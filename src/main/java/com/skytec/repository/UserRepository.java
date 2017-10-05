@@ -1,6 +1,6 @@
-package com.skytec.test.repository;
+package com.skytec.repository;
 
-import com.skytec.test.bean.User;
+import com.skytec.bean.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
