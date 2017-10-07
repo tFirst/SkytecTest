@@ -1,38 +1,62 @@
-<html>
+<%@ page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ page import="java.util.Date" %>
+
+<!DOCTYPE html>
+<% Date start = new Date(); %>
+<html lang="ru">
     <head>
-        <title>Spring boot</title>
+        <title>Игра</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" type="text/css" href="resources/css/index.css">
+
+        <div id="header">
+            <div>
+                Страница для авторизации
+            </div>
+        </div>
     </head>
     <body>
-        <form method="post" action="save">
-            <table align="center">
-                <tr>
-                    <td>
-                        Enter the login:
-                    </td>
-                    <td>
-                        <input type="text" placeholder="Login" maxlength="50" name="loginSpace" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Enter the password:
-                    </td>
-                    <td>
-                        <input type="password" placeholder="Password" maxlength="50" name="passwordSpace" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="submit" value="Sudmit" maxlength="50">
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="center">
-                        <label name="label">${labelValue}</label>
-                    </td>
-                </tr>
-            </table>
-        </form>
+    <div id="body_block">
+        <div>
+            <form method="post" action="save">
+                <table align="center">
+                    <tr>
+                        <td>
+                            Введите имя пользователя:
+                        </td>
+                        <td>
+                            <input type="text" placeholder="Имя пользователя" maxlength="50" name="login" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Введите пароль:
+                        </td>
+                        <td>
+                            <input type="password" placeholder="Пароль" maxlength="50" name="password" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <input type="submit" value="Войти" maxlength="50">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <label name="label">${labelValue}</label>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
     </body>
+    <div id="footer">
+        <div>
+            <label>Время генерации страницы:
+                <% Date end = new Date(); %>
+                <%= end.getTime() - start.getTime() %>ms
+            </label>
+        </div>
+    </div>
 </html>

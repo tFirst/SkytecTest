@@ -16,6 +16,15 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private Long health;
+
+    @Column(nullable = false)
+    private Long damage;
+
+    @Column(nullable = false)
+    private Long rating;
+
     public User() {
     }
 
@@ -41,6 +50,30 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Long getHealth() {
+        return health;
+    }
+
+    public void setHealth(Long health) {
+        this.health = health;
+    }
+
+    public Long getDamage() {
+        return damage;
+    }
+
+    public void setDamage(Long damage) {
+        this.damage = damage;
+    }
+
+    public Long getRating() {
+        return rating;
+    }
+
+    public void setRating(Long rating) {
+        this.rating = rating;
     }
 
     @Override
