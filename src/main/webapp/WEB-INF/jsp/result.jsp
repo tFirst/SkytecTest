@@ -16,9 +16,9 @@
         <h2>Your damage level is ${damage}</h2>
         <h2>Your rating is ${rating}</h2>
         <label name="labelResult">${labelResultValue}</label>
-        <p>
-            <a href="/index"><h4>Go back</h4></a>
-        </p>
+        <form action="index">
+            <input type="submit" value="Выход">
+        </form>
     </body>
     <div id="footer">
         <div>

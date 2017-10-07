@@ -18,14 +18,14 @@
     <body>
     <div id="body_block">
         <div>
-            <form method="post" action="save">
+            <form method="post" action="main">
                 <table align="center">
                     <tr>
                         <td>
                             Введите имя пользователя:
                         </td>
                         <td>
-                            <input type="text" placeholder="Имя пользователя" maxlength="50" name="login" />
+                            <input type="text" placeholder="Имя пользователя" maxlength="50" name="login" required />
                         </td>
                     </tr>
                     <tr>
@@ -33,7 +33,7 @@
                             Введите пароль:
                         </td>
                         <td>
-                            <input type="password" placeholder="Пароль" maxlength="50" name="password" />
+                            <input type="password" placeholder="Пароль" maxlength="50" name="password" required />
                         </td>
                     </tr>
                     <tr>
