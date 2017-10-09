@@ -1,12 +1,17 @@
 package com.skytec.service;
 
+import com.skytec.bean.Session;
 import com.skytec.bean.User;
+import com.skytec.repository.SessionsRepository;
 import com.skytec.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.servlet.ModelAndView;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -19,11 +24,17 @@ public class UserServiceImpl implements UserService {
     private static final String SUCCESSFULL_AUTH = "Авторизация прошла успешно";
     private static final String INVALID_AUTH = "Неверный логин или пароль";
 
+    private static final Long MEASUREMENT = 1000000000000000L;
+
+    private List<Long> sessionsIds = new ArrayList<>();
+
     private final UserRepository repository;
+    private final SessionsRepository sessionsRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository repository) {
+    public UserServiceImpl(UserRepository repository, SessionsRepository sessionsRepository) {
         this.repository = repository;
+        this.sessionsRepository = sessionsRepository;
     }
 
     @Override
@@ -32,7 +43,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String isAuth(String login, String password, ModelMap modelMap) {
+    public ModelAndView isAuth(String login, String password, ModelMap modelMap) {
         User user = repository.findByLogin(login);
         if (user == null) {
             repository.save(User.builder()
@@ -43,25 +54,67 @@ public class UserServiceImpl implements UserService {
                     .rating(DEFAULT_RATING)
                     .build());
             modelMap.put("login", login);
-            modelMap.put("password", password);
-            modelMap.put("health", DEFAULT_HEALTH_LEVEL);
-            modelMap.put("damage", DEFAULT_DAMAGE_LEVEL);
-            modelMap.put("rating", DEFAULT_RATING);
             modelMap.put("labelResultValue", SUCCESSFULL_REGISTRATION);
-            return "result";
+
+            Long sessionIdValue = getSessionId();
+            sessionsIds.add(sessionIdValue);
+
+            modelMap.addAttribute(sessionIdValue);
+
+            sessionsRepository.save(Session.builder()
+                    .userId(repository.findByLogin(login).getId())
+                    .sessionId(sessionIdValue)
+                    .build());
+
+            return new ModelAndView("redirect:/main", modelMap);
         } else {
             if (user.getPassword().equals(password)) {
                 modelMap.put("login", login);
-                modelMap.put("password", password);
-                modelMap.put("health", user.getHealth());
-                modelMap.put("damage", user.getDamage());
-                modelMap.put("rating", user.getRating());
                 modelMap.put("labelResultValue", SUCCESSFULL_AUTH);
-                return "result";
+
+                if (!checkSession(user)) {
+                    Long sessionIdValue = getSessionId();
+                    sessionsIds.add(sessionIdValue);
+
+                    sessionsRepository.save(Session.builder()
+                            .userId(user.getId())
+                            .sessionId(sessionIdValue)
+                            .build());
+
+                    modelMap.addAttribute(sessionIdValue);
+                } else {
+                    sessionsIds.remove(sessionsRepository.findByUserId(user.getId()));
+                    sessionsRepository.delete(sessionsRepository.findByUserId(user.getId()));
+
+                    Long sessionIdValue = getSessionId();
+                    sessionsIds.add(sessionIdValue);
+
+                    sessionsRepository.save(Session.builder()
+                            .userId(user.getId())
+                            .sessionId(sessionIdValue)
+                            .build());
+
+                    modelMap.addAttribute(sessionIdValue);
+                }
+                return new ModelAndView("redirect:/main", modelMap);
             } else {
                 modelMap.put("labelValue", INVALID_AUTH);
-                return "index";
+                return new ModelAndView("redirect:/index");
             }
         }
+    }
+
+    @Override
+    public ModelAndView isInfo(ModelMap modelMap) {
+        return new ModelAndView("redirect:/info", modelMap);
+    }
+
+    private Long getSessionId() {
+        Long value = (long) (Math.random() * MEASUREMENT);
+        return (!sessionsIds.contains(value)) ? value : getSessionId();
+    }
+
+    private Boolean checkSession(User user) {
+        return sessionsRepository.findByUserId(user.getId()) != null;
     }
 }

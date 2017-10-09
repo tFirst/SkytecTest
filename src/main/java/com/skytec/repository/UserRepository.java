@@ -8,7 +8,10 @@ import java.util.Collection;
 
 @Repository
 public interface UserRepository extends CrudRepository<User, Long> {
+
     Collection<User> findAll();
 
     User findByLogin(String login);
+
+    User findById(Long id);
 }
