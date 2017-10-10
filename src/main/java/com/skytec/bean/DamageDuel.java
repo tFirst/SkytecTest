@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import javax.persistence.*;
-import java.sql.Time;
-import java.util.Date;
-
 
 @Builder
 @NoArgsConstructor
@@ -17,22 +14,19 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode
 @Entity
-@Table(name = "Duels")
-public class Duels {
+@Table(name = "damage_duel")
+public class DamageDuel {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column(name = "date")
-    private Date date;
+    @Column(name = "duel_id")
+    private Long duelId;
 
-    @Column(name = "user_one_id")
-    private Long userOneId;
+    @Column(name = "damager_id")
+    private Long damagerId;
 
-    @Column(name = "user_two_id")
-    private Long userTwoId;
-
-    @Column(name = "winner_id")
-    private Long winnerId;
+    @Column(name = "damage")
+    private Long damage;
 }

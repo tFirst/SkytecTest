@@ -1,4 +1,4 @@
-package com.skytec.service;
+package com.skytec.service.user;
 
 import com.skytec.bean.User;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ public interface UserService {
 
     Collection<User> findAll();
 
-    ModelAndView isAuth(String login, String password, ModelMap modelMap);
+    String isAuth(String login, String password, ModelMap modelMap);
 
     ModelAndView isInfo(ModelMap modelMap);
 }

@@ -1,4 +1,4 @@
-package com.skytec.service;
+package com.skytec.service.user;
 
 import com.skytec.bean.Session;
 import com.skytec.bean.User;
@@ -20,8 +20,8 @@ public class UserServiceImpl implements UserService {
     private static final Long DEFAULT_DAMAGE_LEVEL = 10L;
     private static final Long DEFAULT_RATING = 100L;
 
-    private static final String SUCCESSFULL_REGISTRATION = "Регистрация прошла успешно";
-    private static final String SUCCESSFULL_AUTH = "Авторизация прошла успешно";
+    private static final String SUCCESSFULL_REGISTRATION = "Registration successfull";
+    private static final String SUCCESSFULL_AUTH = "Auth successfull";
     private static final String INVALID_AUTH = "Неверный логин или пароль";
 
     private static final Long MEASUREMENT = 1000000000000000L;
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ModelAndView isAuth(String login, String password, ModelMap modelMap) {
+    public String isAuth(String login, String password, ModelMap modelMap) {
         User user = repository.findByLogin(login);
         if (user == null) {
             repository.save(User.builder()
@@ -66,40 +66,40 @@ public class UserServiceImpl implements UserService {
                     .sessionId(sessionIdValue)
                     .build());
 
-            return new ModelAndView("redirect:/main", modelMap);
+            return "redirect:/main?login=" + login +
+                    "&password=" + password +
+                    "&long=" + sessionIdValue +
+                    "&labelResultValue=" + SUCCESSFULL_REGISTRATION;//new ModelAndView("redirect:/main", modelMap);
         } else {
             if (user.getPassword().equals(password)) {
                 modelMap.put("login", login);
                 modelMap.put("labelResultValue", SUCCESSFULL_AUTH);
 
-                if (!checkSession(user)) {
-                    Long sessionIdValue = getSessionId();
-                    sessionsIds.add(sessionIdValue);
+                Long sessionIdValue = getSessionId();
+                sessionsIds.add(sessionIdValue);
 
+                if (!checkSession(user)) {
                     sessionsRepository.save(Session.builder()
                             .userId(user.getId())
                             .sessionId(sessionIdValue)
                             .build());
-
-                    modelMap.addAttribute(sessionIdValue);
                 } else {
                     sessionsIds.remove(sessionsRepository.findByUserId(user.getId()));
                     sessionsRepository.delete(sessionsRepository.findByUserId(user.getId()));
 
-                    Long sessionIdValue = getSessionId();
-                    sessionsIds.add(sessionIdValue);
-
                     sessionsRepository.save(Session.builder()
                             .userId(user.getId())
                             .sessionId(sessionIdValue)
                             .build());
-
-                    modelMap.addAttribute(sessionIdValue);
                 }
-                return new ModelAndView("redirect:/main", modelMap);
+
+                modelMap.addAttribute(sessionIdValue);
+                return "redirect:/main?login=" + login +
+                        "&long=" + sessionIdValue +
+                        "&labelResultValue=" + SUCCESSFULL_AUTH;//new ModelAndView("redirect:/main", modelMap);
             } else {
                 modelMap.put("labelValue", INVALID_AUTH);
-                return new ModelAndView("redirect:/index");
+                return "forward:/index";//new ModelAndView("redirect:/index", modelMap);
             }
         }
     }

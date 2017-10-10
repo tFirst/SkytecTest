@@ -1,22 +1,15 @@
 package com.skytec.web;
 
-import com.skytec.service.DuelService;
+import com.skytec.service.duel.DuelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Controller
-public class DuelController extends HttpServlet {
+public class DuelController {
 
     private Long sessionId;
-    private ModelMap modelMap;
 
     private final DuelService duelService;
 
@@ -27,16 +20,18 @@ public class DuelController extends HttpServlet {
 
     @GetMapping("duel")
     public String duel(@ModelAttribute("long") Long sessionId,
-                       ModelMap model) {
-        modelMap = model;
+                       ModelMap modelMap) {
         this.sessionId = sessionId;
         return duelService.isDuel(sessionId, modelMap);
     }
 
-    @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        duelService.searchEnemy(sessionId, modelMap);
-        response.sendRedirect(request.getContextPath() + "/duel");
-        //return duelService.searchEnemy(sessionId, modelMap);
+    @RequestMapping("search")
+    public String search(ModelMap modelMap) {
+        return duelService.searchEnemy(sessionId, modelMap);
+    }
+
+    @RequestMapping("attack")
+    public String attack(ModelMap modelMap) {
+        return duelService.attack(sessionId, modelMap);
     }
 }

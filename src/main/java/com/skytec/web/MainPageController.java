@@ -1,7 +1,7 @@
 package com.skytec.web;
 
 
-import com.skytec.service.UserService;
+import com.skytec.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -26,9 +26,9 @@ public class MainPageController {
 
     @GetMapping("main")
     public String main(@RequestParam("login") String login,
-                             @RequestParam("labelResultValue") String labelResultValue,
-                             @ModelAttribute("long") Long sessionId,
-                             ModelMap modelMap) {
+                              @RequestParam("labelResultValue") String labelResultValue,
+                              @ModelAttribute("long") Long sessionId,
+                              ModelMap modelMap) {
         this.modelMap = new ModelMap();
         this.modelMap.addAttribute(sessionId);
         modelMap.put("login", login);

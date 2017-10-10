@@ -1,6 +1,8 @@
+<%@ page import="java.util.Date" %>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 
 <!DOCTYPE html>
+<% Date start = new Date(); %>
 <html lang="ru">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -13,7 +15,7 @@
     <table align="center" width="60%" border="1px">
         <tr>
             <td colspan="5" align="center">
-                <form action="duel" method="post">
+                <form action="search" method="post">
                     <input type="submit" value="Поиск соперника">
                 </form>
             </td>
@@ -22,17 +24,19 @@
             <td colspan="2" width="15%">
                 ${yourLogin}
             </td>
-            <td  width="30%" rowspan="4"></td>
+            <td  width="30%" rowspan="4" align="center">
+                <textarea readonly >${textAreaValue}</textarea>
+            </td>
             <td colspan="2" width="15%">
                 ${enemyLogin}
             </td>
         </tr>
         <tr>
             <td colspan="2" width="15%">
-                <progress name="yourHealthValue" value="${yourHealth}" max="${yourHealth}"></progress> ${yourHealth}hp
+                <progress name="yourHealthValue" value="${yourHealth}" max="${yourHealthMax}"></progress> ${yourHealth}hp
             </td>
             <td colspan="2" width="15%">
-                <progress name="yourHealthValue" value="${enemyHealth}" max="${enemyHealth}"></progress> ${enemyHealth}hp
+                <progress name="yourHealthValue" value="${enemyHealth}" max="${enemyHealthMax}"></progress> ${enemyHealth}hp
             </td>
         </tr>
         <tr>
@@ -46,7 +50,7 @@
         <tr>
             <td colspan="2" width="15%"></td>
             <td colspan="2" width="15%">
-                <form action="duel">
+                <form action="attack">
                     <input type="submit" value="Атаковать">
                 </form>
             </td>
@@ -60,4 +64,12 @@
     </table>
 </div>
 </body>
+<div id="footer">
+    <div>
+        <label>Время генерации страницы:
+            <% Date end = new Date(); %>
+            <%= end.getTime() - start.getTime() %>ms
+        </label>
+    </div>
+</div>
 </html>

@@ -1,22 +1,24 @@
 package com.skytec.web;
 
 
-import com.skytec.service.UserService;
+import com.skytec.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-@Controller
+@RestController
 @SessionAttributes("sessionId")
 public class AuthController extends WebMvcConfigurerAdapter {
+
+    private final UserService userService;
+
+    @Autowired
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
@@ -26,18 +28,15 @@ public class AuthController extends WebMvcConfigurerAdapter {
                 .setViewName("/index");
     }
 
-    @Autowired
-    private UserService userService;
-
-    @GetMapping("index")
-    public String index() {
-        return "index";
+    @RequestMapping(value = "/index", method = RequestMethod.GET)
+    public ModelAndView index() {
+        return new ModelAndView("index");
     }
 
-    @PostMapping("main")
+    @RequestMapping(value = "/main", method = RequestMethod.POST)
     public ModelAndView main(@RequestParam("login") String login,
-                             @RequestParam("password") String password,
-                             ModelMap modelMap) {
-        return userService.isAuth(login, password, modelMap);
+                               @RequestParam("password") String password,
+                               ModelMap modelMap) {
+        return new ModelAndView(userService.isAuth(login, password, modelMap));
     }
 }
