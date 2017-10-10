@@ -52,7 +52,7 @@
     </tr>
     <tr>
         <td colspan="2">
-            <label name="labelWait">${labelWaitValue}</label>
+            <label name="labelWait">${labelValue}</label>
         </td>
     </tr>
 </table>

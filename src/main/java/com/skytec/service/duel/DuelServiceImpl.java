@@ -41,6 +41,10 @@ public class DuelServiceImpl implements DuelService {
         Session session = sessionsRepository.findBySessionId(sessionId);
         User user = userRepository.findById(session.getUserId());
 
+        if (readyToDuelRepository.findByUserId(user.getId()) != null) {
+            readyToDuelRepository.delete(readyToDuelRepository.findByUserId(user.getId()));
+        }
+
         readyToDuelRepository.save(ReadyToDuel.builder()
                 .userId(user.getId())
                 .build());
@@ -56,20 +60,21 @@ public class DuelServiceImpl implements DuelService {
     private ReadyToDuel getReadyToDuel(User user) {
 
         List<ReadyToDuel> listRTD = (List<ReadyToDuel>) readyToDuelRepository.findAll();
-        Long[] arrayUserIdsRTD = new Long[(listRTD.size()-1 < 0) ? 0 : listRTD.size()-1];
+        listRTD.remove(readyToDuelRepository.findByUserId(user.getId()));
+        /*Long[] arrayUserIdsRTD = new Long[(listRTD.size()-1 < 0) ? 0 : listRTD.size()-1];
 
         if (arrayUserIdsRTD.length <= 0) return null;
 
         for (int i = 0, k = 0; i < listRTD.size(); i++, k++) {
-            if (listRTD.get(i).getUserId().equals(user.getId())) {
+            if (Objects.equals(listRTD.get(i).getUserId(), user.getId())) {
                 k--;
             } else {
                 arrayUserIdsRTD[k] = listRTD.get(i).getUserId();
             }
-        }
+        }*/
 
         Random random = new Random();
-        Integer randomUserId = random.nextInt(arrayUserIdsRTD.length);
+        Integer randomUserId = random.nextInt(listRTD.size());
         return listRTD.get(randomUserId);
     }
 
@@ -86,14 +91,10 @@ public class DuelServiceImpl implements DuelService {
         modelMap.put("yourDamage", user.getDamage());
 
         if (readyToDuelEnemy == null) {
-            if (readyToDuelRepository.findByUserId(user.getId()) != null) {
+            if (currentDuelsValuesRepository.findByUserId(user.getId()) != null) {
                 addEnemyInfo(modelMap, user);
             } else {
-                if (currentDuelsValuesRepository.findByUserId(user.getId()) != null) {
-                    addEnemyInfo(modelMap, user);
-                } else {
-                    modelMap.put("labelWaitValue", "Соперник не найден. Возобновите поиск позже");
-                }
+                modelMap.put("labelWaitValue", "Соперник не найден. Возобновите поиск позже");
             }
         } else {
             if (readyToDuelRepository.findByUserId(user.getId()) != null) {
@@ -111,7 +112,7 @@ public class DuelServiceImpl implements DuelService {
 
                 System.out.println(userEnemy.getId());
                 readyToDuelRepository.delete(
-                        readyToDuelRepository.findByUserId(userEnemy.getId())
+                        readyToDuelRepository.findByUserId(readyToDuelEnemy.getUserId())
                 );
 
                 currentDuelsValuesRepository.save(CurrentDuelsValues.builder()
@@ -149,9 +150,11 @@ public class DuelServiceImpl implements DuelService {
                 duelsRepository.findById(userValues.getDuelId()).getUserTwoId());
         CurrentDuelsValues enemyValues = currentDuelsValuesRepository.findByUserId(userEnemy.getId());
 
+        modelMap.put("yourLogin", user.getLogin());
         modelMap.put("yourHealth", userValues.getHealth());
         modelMap.put("yourHealthMax", user.getHealth());
         modelMap.put("yourDamage", user.getDamage());
+        modelMap.put("enemyLogin", userEnemy.getLogin());
         modelMap.put("enemyHealth", enemyValues.getHealth()-user.getDamage());
         modelMap.put("enemyHealthMax", userEnemy.getHealth());
         modelMap.put("enemyDamage", userEnemy.getDamage());
@@ -188,11 +191,11 @@ public class DuelServiceImpl implements DuelService {
         if (currentDuelsValues.get(0).getHealth() <= 0) {
             winner = userRepository.findById(currentDuelsValues.get(1).getUserId());
             looser = userRepository.findById(currentDuelsValues.get(0).getUserId());
-            return saveAfterDuel(winner, looser);
+            return saveAfterDuel(winner, looser, new ModelMap(), user);
         } else if (currentDuelsValues.get(1).getHealth() <= 0){
             winner = userRepository.findById(currentDuelsValues.get(0).getUserId());
             looser = userRepository.findById(currentDuelsValues.get(1).getUserId());
-            return saveAfterDuel(winner, looser);
+            return saveAfterDuel(winner, looser, new ModelMap(), user);
         }
         return "duel";
     }
@@ -208,7 +211,7 @@ public class DuelServiceImpl implements DuelService {
         modelMap.put("labelWaitValue", "Соперник найден");
     }
 
-    private String saveAfterDuel(User winner, User looser) {
+    private String saveAfterDuel(User winner, User looser, ModelMap modelMap, User userCurr) {
         userRepository.delete(winner);
         userRepository.delete(looser);
         winner.setHealth(winner.getHealth()+1);
@@ -223,6 +226,12 @@ public class DuelServiceImpl implements DuelService {
         currentDuelsValuesRepository.delete
                 (currentDuelsValuesRepository.findByDuelId
                         (duelsRepository.findByDate(currentDate).getId()));
+
+        modelMap.put("login", userCurr.getLogin());
+        modelMap.put("health", userCurr.getHealth());
+        modelMap.put("damage", userCurr.getDamage());
+        modelMap.put("rating", userCurr.getRating());
+        modelMap.put("labelValue", "Бой окончен");
 
         return "info";
     }

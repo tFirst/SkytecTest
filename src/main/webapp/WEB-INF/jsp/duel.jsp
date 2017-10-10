@@ -25,7 +25,9 @@
                 ${yourLogin}
             </td>
             <td  width="30%" rowspan="4" align="center">
-                <textarea readonly >${textAreaValue}</textarea>
+                <label>
+                    <textarea readonly="readonly" style="width: 98%; height: 100%">${textAreaValue}</textarea>
+                </label>
             </td>
             <td colspan="2" width="15%">
                 ${enemyLogin}
