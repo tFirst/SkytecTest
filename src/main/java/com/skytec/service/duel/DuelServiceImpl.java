@@ -74,8 +74,12 @@ public class DuelServiceImpl implements DuelService {
         }*/
 
         Random random = new Random();
-        Integer randomUserId = random.nextInt(listRTD.size());
-        return listRTD.get(randomUserId);
+        if (listRTD.size() <= 0) {
+            return null;
+        } else {
+            Integer randomUserId = random.nextInt(listRTD.size());
+            return listRTD.get(randomUserId);
+        }
     }
 
     @Override
@@ -144,58 +148,62 @@ public class DuelServiceImpl implements DuelService {
         Session session = sessionsRepository.findBySessionId(sessionId);
         User user = userRepository.findById(session.getUserId());
 
-        CurrentDuelsValues userValues = currentDuelsValuesRepository.findByUserId(user.getId());
-        Duels duel = duelsRepository.findById(userValues.getDuelId());
-        User userEnemy = userRepository.findById(
-                duelsRepository.findById(userValues.getDuelId()).getUserTwoId());
-        CurrentDuelsValues enemyValues = currentDuelsValuesRepository.findByUserId(userEnemy.getId());
+        if (currentDuelsValuesRepository.findByDuelId(user.getId()) == null) {
+            return "info";
+        } else {
+            CurrentDuelsValues userValues = (currentDuelsValuesRepository.findByUserId(user.getId()));
+            Duels duel = duelsRepository.findById(userValues.getDuelId());
+            User userEnemy = userRepository.findById(
+                    duelsRepository.findById(userValues.getDuelId()).getUserTwoId());
+            CurrentDuelsValues enemyValues = currentDuelsValuesRepository.findByUserId(userEnemy.getId());
 
-        modelMap.put("yourLogin", user.getLogin());
-        modelMap.put("yourHealth", userValues.getHealth());
-        modelMap.put("yourHealthMax", user.getHealth());
-        modelMap.put("yourDamage", user.getDamage());
-        modelMap.put("enemyLogin", userEnemy.getLogin());
-        modelMap.put("enemyHealth", enemyValues.getHealth()-user.getDamage());
-        modelMap.put("enemyHealthMax", userEnemy.getHealth());
-        modelMap.put("enemyDamage", userEnemy.getDamage());
-        modelMap.put("labelWaitValue", "Идет бой");
+            modelMap.put("yourLogin", user.getLogin());
+            modelMap.put("yourHealth", userValues.getHealth());
+            modelMap.put("yourHealthMax", user.getHealth());
+            modelMap.put("yourDamage", user.getDamage());
+            modelMap.put("enemyLogin", userEnemy.getLogin());
+            modelMap.put("enemyHealth", enemyValues.getHealth() - user.getDamage());
+            modelMap.put("enemyHealthMax", userEnemy.getHealth());
+            modelMap.put("enemyDamage", userEnemy.getDamage());
+            modelMap.put("labelWaitValue", "Идет бой");
 
-        CurrentDuelsValues currentDuelsValuesEnemy = currentDuelsValuesRepository.findByUserId(userEnemy.getId());
-        currentDuelsValuesRepository.delete(currentDuelsValuesEnemy);
-        currentDuelsValuesRepository.save(CurrentDuelsValues.builder()
-                .duelId(currentDuelsValuesEnemy.getDuelId())
-                .health((currentDuelsValuesEnemy.getHealth()-user.getDamage() < 0)
-                        ? 0 : currentDuelsValuesEnemy.getHealth()-user.getDamage())
-                .userId(currentDuelsValuesEnemy.getUserId())
-                .build());
+            CurrentDuelsValues currentDuelsValuesEnemy = currentDuelsValuesRepository.findByUserId(userEnemy.getId());
+            currentDuelsValuesRepository.delete(currentDuelsValuesEnemy);
+            currentDuelsValuesRepository.save(CurrentDuelsValues.builder()
+                    .duelId(currentDuelsValuesEnemy.getDuelId())
+                    .health((currentDuelsValuesEnemy.getHealth() - user.getDamage() < 0)
+                            ? 0 : currentDuelsValuesEnemy.getHealth() - user.getDamage())
+                    .userId(currentDuelsValuesEnemy.getUserId())
+                    .build());
 
-        damageDuelRepository.save(DamageDuel.builder()
-                .duelId(duel.getId())
-                .damagerId(user.getId())
-                .damage(user.getDamage())
-                .build());
+            damageDuelRepository.save(DamageDuel.builder()
+                    .duelId(duel.getId())
+                    .damagerId(user.getId())
+                    .damage(user.getDamage())
+                    .build());
 
-        StringBuffer sb = new StringBuffer();
-        sb.append(user.getLogin())
-                .append(" ударил ")
-                .append(userEnemy.getLogin())
-                .append(" на ")
-                .append(user.getDamage())
-                .append(" урона");
-        modelMap.put("textAreaValue", sb);
+            StringBuffer sb = new StringBuffer();
+            sb.append(user.getLogin())
+                    .append(" ударил ")
+                    .append(userEnemy.getLogin())
+                    .append(" на ")
+                    .append(user.getDamage())
+                    .append(" урона");
+            modelMap.put("textAreaValue", sb);
 
-        User winner;
-        User looser;
-        List<CurrentDuelsValues> currentDuelsValues = (List<CurrentDuelsValues>)
-                currentDuelsValuesRepository.findByDuelId(currentDuelsValuesEnemy.getDuelId());
-        if (currentDuelsValues.get(0).getHealth() <= 0) {
-            winner = userRepository.findById(currentDuelsValues.get(1).getUserId());
-            looser = userRepository.findById(currentDuelsValues.get(0).getUserId());
-            return saveAfterDuel(winner, looser, new ModelMap(), user);
-        } else if (currentDuelsValues.get(1).getHealth() <= 0){
-            winner = userRepository.findById(currentDuelsValues.get(0).getUserId());
-            looser = userRepository.findById(currentDuelsValues.get(1).getUserId());
-            return saveAfterDuel(winner, looser, new ModelMap(), user);
+            User winner;
+            User looser;
+            List<CurrentDuelsValues> currentDuelsValues = (List<CurrentDuelsValues>)
+                    currentDuelsValuesRepository.findByDuelId(currentDuelsValuesEnemy.getDuelId());
+            if (currentDuelsValues.get(0).getHealth() <= 0) {
+                winner = userRepository.findById(currentDuelsValues.get(1).getUserId());
+                looser = userRepository.findById(currentDuelsValues.get(0).getUserId());
+                return saveAfterDuel(winner, looser, new ModelMap(), user);
+            } else if (currentDuelsValues.get(1).getHealth() <= 0) {
+                winner = userRepository.findById(currentDuelsValues.get(0).getUserId());
+                looser = userRepository.findById(currentDuelsValues.get(1).getUserId());
+                return saveAfterDuel(winner, looser, new ModelMap(), user);
+            }
         }
         return "duel";
     }
