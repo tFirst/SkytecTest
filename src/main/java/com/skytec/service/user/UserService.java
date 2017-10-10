@@ -1,7 +1,6 @@
 package com.skytec.service.user;
 
 import com.skytec.bean.User;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
